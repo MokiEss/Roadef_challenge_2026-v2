@@ -1,0 +1,4 @@
+/home/uha/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -S /home/uha/Desktop/Roadef_challenge_2026-master -B /home/uha/Desktop/Roadef_challenge_2026-master/cmake-build-release
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/uha/Desktop/Roadef_challenge_2026-master/cmake-build-release

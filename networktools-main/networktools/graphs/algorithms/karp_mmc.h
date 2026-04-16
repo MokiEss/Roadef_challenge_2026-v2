@@ -1,0 +1,621 @@
+/*
+ * Software Name : networktools
+ * SPDX-FileCopyrightText: Copyright (c) Orange SA
+ * SPDX-License-Identifier: MIT
+ *
+ * This software is distributed under the MIT licence,
+ * see the "LICENSE" file for more details or https://opensource.org/license/MIT
+ *
+ * Authors: see CONTRIBUTORS.md
+ * Software description: An efficient C++ library for modeling and solving network optimization problems
+ *
+ * ============================================================================
+ *
+ * This file incorporates work from the LEMON graph library (karp_mmc.h).
+ *
+ * Original LEMON Copyright Notice:
+ * Copyright (C) 2003-2013 Egervary Jeno Kombinatorikus Optimalizalasi
+ * Kutatocsoport (Egervary Research Group on Combinatorial Optimization, EGRES).
+ *
+ * Permission to use, modify and distribute this software is granted provided
+ * that this copyright notice appears in all copies. For precise terms see the
+ * accompanying LICENSE file.
+ *
+ * This software is provided "AS IS" with no warranty of any kind, express or
+ * implied, and with no claim as to its suitability for any purpose.
+ *
+ * ============================================================================
+ * 
+ * List of modifications:
+ *   - Changed namespace from 'lemon' to 'nt'
+ *   - Replaced std::vector with nt::TrivialDynamicArray/nt::DynamicArray
+ *   - Updated include paths to networktools structure
+ *   - Adapted LEMON concept checking to networktools
+ *   - Converted typedef declarations to C++11 using declarations
+ *   - Adapted LEMON INVALID sentinel value handling
+ *   - Added move semantics for performance
+ *   - Updated header guard macros
+ */
+
+/**
+ * @ingroup min_mean_cycle
+ * @file
+ * @brief Karp's algorithm for finding a minimum mean cycle.
+ *
+ * @author LEMON contributors (see original source) and Morgan Chopin (morgan.chopin@orange.com)
+ */
+
+#ifndef _NT_KARP_MMC_H_
+#define _NT_KARP_MMC_H_
+
+#include "connectivity.h"
+#include "../../core/common.h"
+#include "../path.h"
+#include "../../core/tolerance.h"
+#include <limits>
+
+namespace nt {
+  namespace graphs {
+
+/**
+ * @brief Default traits class of KarpMmc class.
+ *
+ * Default traits class of KarpMmc class.
+ * @tparam GR The type of the digraph.
+ * @tparam CM The type of the cost map.
+ * It must conform to the @ref concepts::ReadMap "ReadMap" concept.
+ */
+#ifdef DOXYGEN
+    template < typename GR, typename CM >
+#else
+    template < typename GR, typename CM, bool integer = std::numeric_limits< typename CM::Value >::is_integer >
+#endif
+    struct KarpMmcDefaultTraits {
+      /** The type of the digraph */
+      using Digraph = GR;
+      /** The type of the cost map */
+      using CostMap = CM;
+      /** The type of the arc costs */
+      using Cost = typename CostMap::Value;
+
+      /**
+       * @brief The large cost type used for internal computations
+       *
+       * The large cost type used for internal computations.
+       * It is \c long \c long if the \c Cost type is integer,
+       * otherwise it is \c double.
+       * \c Cost must be convertible to \c LargeCost.
+       */
+      using LargeCost = double;
+
+      /** The tolerance type used for internal computations */
+      using Tolerance = nt::Tolerance< LargeCost >;
+
+      /**
+       * @brief The path type of the found cycles
+       *
+       * The path type of the found cycles.
+       * It must conform to the @ref nt::concepts::Path "Path" concept
+       * and it must have an \c addFront() function.
+       */
+      using Path = nt::graphs::Path< Digraph >;
+    };
+
+    // Default traits class for integer cost types
+    template < typename GR, typename CM >
+    struct KarpMmcDefaultTraits< GR, CM, true > {
+      using Digraph = GR;
+      using CostMap = CM;
+      using Cost = typename CostMap::Value;
+      using LargeCost = long long;
+      using Tolerance = nt::Tolerance< LargeCost >;
+      using Path = nt::graphs::Path< Digraph >;
+    };
+
+/**
+ * \addtogroup min_mean_cycle
+ * @{
+ */
+
+/**
+ * @brief Implementation of Karp's algorithm for finding a minimum
+ * mean cycle.
+ *
+ * This class implements Karp's algorithm for finding a directed
+ * cycle of minimum mean cost in a digraph
+ * \cite karp78characterization, \cite dasdan98minmeancycle.
+ * It runs in time O(nm) and uses space O(n<sup>2</sup>+m).
+ *
+ * @tparam GR The type of the digraph the algorithm runs on.
+ * @tparam CM The type of the cost map. The default
+ * map type is @ref concepts::Digraph::ArcMap "GR::ArcMap<int>".
+ * @tparam TR The traits class that defines various types used by the
+ * algorithm. By default, it is @ref KarpMmcDefaultTraits
+ * "KarpMmcDefaultTraits<GR, CM>".
+ * In most cases, this parameter should not be set directly,
+ * consider to use the named template parameters instead.
+ */
+#ifdef DOXYGEN
+    template < typename GR, typename CM, typename TR >
+#else
+    template < typename GR,
+               typename CM = typename GR::template ArcMap< int >,
+               typename TR = KarpMmcDefaultTraits< GR, CM > >
+#endif
+    class KarpMmc {
+      public:
+      /** The type of the digraph */
+      using Digraph = typename TR::Digraph;
+      /** The type of the cost map */
+      using CostMap = typename TR::CostMap;
+      /** The type of the arc costs */
+      using Cost = typename TR::Cost;
+
+      /**
+       * @brief The large cost type
+       *
+       * The large cost type used for internal computations.
+       * By default, it is \c long \c long if the \c Cost type is integer,
+       * otherwise it is \c double.
+       */
+      using LargeCost = typename TR::LargeCost;
+
+      /** The tolerance type */
+      using Tolerance = typename TR::Tolerance;
+
+      /**
+       * @brief The path type of the found cycles
+       *
+       * The path type of the found cycles.
+       * Using the @ref nt::KarpMmcDefaultTraits "default traits class",
+       * it is @ref nt::graphs::Path "Path<Digraph>".
+       */
+      using Path = typename TR::Path;
+
+      /**
+       * The @ref nt::KarpMmcDefaultTraits "traits class" of the algorithm
+       */
+      using Traits = TR;
+
+      private:
+      TEMPLATE_DIGRAPH_TYPEDEFS(Digraph);
+
+      // Data sturcture for path data
+      struct PathData {
+        LargeCost dist;
+        Arc       pred;
+        PathData(LargeCost d, Arc p = INVALID) : dist(d), pred(p) {}
+      };
+
+      using PathDataNodeMap = typename Digraph::template NodeMap< nt::TrivialDynamicArray< PathData > >;
+
+      private:
+      // The digraph the algorithm runs on
+      const Digraph& _gr;
+      // The cost of the arcs
+      const CostMap& _cost;
+
+      // Data for storing the strongly connected components
+      int                                                                  _comp_num;
+      typename Digraph::template NodeMap< int >                            _comp;
+      nt::DynamicArray< nt::TrivialDynamicArray< Node > >                  _comp_nodes;   // TODO: use multidimarray
+      nt::TrivialDynamicArray< Node >*                                     _nodes;
+      typename Digraph::template NodeMap< nt::TrivialDynamicArray< Arc > > _out_arcs;
+
+      // Data for the found cycle
+      LargeCost _cycle_cost;
+      int       _cycle_size;
+      Node      _cycle_node;
+
+      Path* _cycle_path;
+      bool  _local_path;
+
+      // Node map for storing path data
+      PathDataNodeMap _data;
+      // The processed nodes in the last round
+      nt::TrivialDynamicArray< Node > _process;
+
+      Tolerance _tolerance;
+
+      // Infinite constant
+      const LargeCost INF;
+
+      public:
+      /**
+       * \name Named Template Parameters
+       * @{
+       */
+
+      template < typename T >
+      struct SetLargeCostTraits: public Traits {
+        using LargeCost = T;
+        using Tolerance = nt::Tolerance< T >;
+      };
+
+      /**
+       * @brief @ref named-templ-param "Named parameter" for setting
+       * \c LargeCost type.
+       *
+       * @ref named-templ-param "Named parameter" for setting \c LargeCost
+       * type. It is used for internal computations in the algorithm.
+       */
+      template < typename T >
+      struct SetLargeCost: public KarpMmc< GR, CM, SetLargeCostTraits< T > > {
+        using Create = KarpMmc< GR, CM, SetLargeCostTraits< T > >;
+      };
+
+      template < typename T >
+      struct SetPathTraits: public Traits {
+        using Path = T;
+      };
+
+      /**
+       * @brief @ref named-templ-param "Named parameter" for setting
+       * \c %Path type.
+       *
+       * @ref named-templ-param "Named parameter" for setting the \c %Path
+       * type of the found cycles.
+       * It must conform to the @ref nt::concepts::Path "Path" concept
+       * and it must have an \c addFront() function.
+       */
+      template < typename T >
+      struct SetPath: public KarpMmc< GR, CM, SetPathTraits< T > > {
+        using Create = KarpMmc< GR, CM, SetPathTraits< T > >;
+      };
+
+      /** @} */
+
+      protected:
+      KarpMmc() {}
+
+      public:
+      /**
+       * @brief Constructor.
+       *
+       * The constructor of the class.
+       *
+       * @param digraph The digraph the algorithm runs on.
+       * @param cost The costs of the arcs.
+       */
+      KarpMmc(const Digraph& digraph, const CostMap& cost) :
+          _gr(digraph), _cost(cost), _comp(digraph), _out_arcs(digraph), _cycle_cost(0), _cycle_size(1),
+          _cycle_node(INVALID), _cycle_path(NULL), _local_path(false), _data(digraph),
+          INF(std::numeric_limits< LargeCost >::has_infinity ? std::numeric_limits< LargeCost >::infinity()
+                                                             : std::numeric_limits< LargeCost >::max()) {}
+
+      /** Destructor. */
+      ~KarpMmc() noexcept {
+        if (_local_path) delete _cycle_path;
+      }
+
+      /**
+       * @brief Set the path structure for storing the found cycle.
+       *
+       * This function sets an external path structure for storing the
+       * found cycle.
+       *
+       * If you don't call this function before calling @ref run() or
+       * @ref findCycleMean(), a local @ref Path "path" structure
+       * will be allocated. The destuctor deallocates this automatically
+       * allocated object, of course.
+       *
+       * @note The algorithm calls only the @ref nt::graphs::Path::addFront()
+       * "addFront()" function of the given path structure.
+       *
+       * @return <tt>(*this)</tt>
+       */
+      KarpMmc& cycle(Path& path) {
+        if (_local_path) {
+          delete _cycle_path;
+          _local_path = false;
+        }
+        _cycle_path = &path;
+        return *this;
+      }
+
+      /**
+       * @brief Set the tolerance used by the algorithm.
+       *
+       * This function sets the tolerance object used by the algorithm.
+       *
+       * @return <tt>(*this)</tt>
+       */
+      KarpMmc& tolerance(const Tolerance& tolerance) {
+        _tolerance = tolerance;
+        return *this;
+      }
+
+      /**
+       * @brief Return a const reference to the tolerance.
+       *
+       * This function returns a const reference to the tolerance object
+       * used by the algorithm.
+       */
+      const Tolerance& tolerance() const { return _tolerance; }
+
+      /**
+       * \name Execution control
+       * The simplest way to execute the algorithm is to call the @ref run()
+       * function.\n
+       * If you only need the minimum mean cost, you may call
+       * @ref findCycleMean().
+       */
+
+      /** @{ */
+
+      /**
+       * @brief Run the algorithm.
+       *
+       * This function runs the algorithm.
+       * It can be called more than once (e.g. if the underlying digraph
+       * and/or the arc costs have been modified).
+       *
+       * @return \c true if a directed cycle exists in the digraph.
+       *
+       * @note <tt>mmc.run()</tt> is just a shortcut of the following code.
+       * @code
+       * return mmc.findCycleMean() && mmc.findCycle();
+       * @endcode
+       */
+      bool run() { return findCycleMean() && findCycle(); }
+
+      /**
+       * @brief Find the minimum cycle mean.
+       *
+       * This function finds the minimum mean cost of the directed
+       * cycles in the digraph.
+       *
+       * @return \c true if a directed cycle exists in the digraph.
+       */
+      bool findCycleMean() {
+        // Initialization and find strongly connected components
+        init();
+        findComponents();
+
+        // Find the minimum cycle mean in the components
+        for (int comp = 0; comp < _comp_num; ++comp) {
+          if (!initComponent(comp)) continue;
+          processRounds();
+          updateMinMean();
+        }
+        return (_cycle_node != INVALID);
+      }
+
+      /**
+       * @brief Find a minimum mean directed cycle.
+       *
+       * This function finds a directed cycle of minimum mean cost
+       * in the digraph using the data computed by findCycleMean().
+       *
+       * @return \c true if a directed cycle exists in the digraph.
+       *
+       * @pre @ref findCycleMean() must be called before using this function.
+       */
+      bool findCycle() {
+        if (_cycle_node == INVALID) return false;
+        IntNodeMap reached(_gr, -1);
+        int        r = _data[_cycle_node].size();
+        Node       u = _cycle_node;
+        while (reached[u] < 0) {
+          reached[u] = --r;
+          u = _gr.source(_data[u][r].pred);
+        }
+        r = reached[u];
+        Arc e = _data[u][r].pred;
+        _cycle_path->addFront(e);
+        _cycle_cost = _cost[e];
+        _cycle_size = 1;
+        Node v;
+        while ((v = _gr.source(e)) != u) {
+          e = _data[v][--r].pred;
+          _cycle_path->addFront(e);
+          _cycle_cost += _cost[e];
+          ++_cycle_size;
+        }
+        return true;
+      }
+
+      /** @} */
+
+      /**
+       * \name Query Functions
+       * The results of the algorithm can be obtained using these
+       * functions.\n
+       * The algorithm should be executed before using them.
+       */
+
+      /** @{ */
+
+      /**
+       * @brief Return the total cost of the found cycle.
+       *
+       * This function returns the total cost of the found cycle.
+       *
+       * @pre @ref run() or @ref findCycleMean() must be called before
+       * using this function.
+       */
+      Cost cycleCost() const { return static_cast< Cost >(_cycle_cost); }
+
+      /**
+       * @brief Return the number of arcs on the found cycle.
+       *
+       * This function returns the number of arcs on the found cycle.
+       *
+       * @pre @ref run() or @ref findCycleMean() must be called before
+       * using this function.
+       */
+      int cycleSize() const { return _cycle_size; }
+
+      /**
+       * @brief Return the mean cost of the found cycle.
+       *
+       * This function returns the mean cost of the found cycle.
+       *
+       * @note <tt>alg.cycleMean()</tt> is just a shortcut of the
+       * following code.
+       * @code
+       * return static_cast<double>(alg.cycleCost()) / alg.cycleSize();
+       * @endcode
+       *
+       * @pre @ref run() or @ref findCycleMean() must be called before
+       * using this function.
+       */
+      double cycleMean() const { return static_cast< double >(_cycle_cost) / _cycle_size; }
+
+      /**
+       * @brief Return the found cycle.
+       *
+       * This function returns a const reference to the path structure
+       * storing the found cycle.
+       *
+       * @pre @ref run() or @ref findCycle() must be called before using
+       * this function.
+       */
+      const Path& cycle() const { return *_cycle_path; }
+
+      /** @} */
+
+      private:
+      // Initialization
+      void init() {
+        if (!_cycle_path) {
+          _local_path = true;
+          _cycle_path = new Path;
+        }
+        _cycle_path->clear();
+        _cycle_cost = 0;
+        _cycle_size = 1;
+        _cycle_node = INVALID;
+        for (NodeIt u(_gr); u != INVALID; ++u)
+          _data[u].clear();
+      }
+
+      // Find strongly connected components and initialize _comp_nodes
+      // and _out_arcs
+      void findComponents() {
+        _comp_num = stronglyConnectedComponents(_gr, _comp);
+        _comp_nodes.resize(_comp_num);
+        if (_comp_num == 1) {
+          _comp_nodes[0].clear();
+          for (NodeIt n(_gr); n != INVALID; ++n) {
+            _comp_nodes[0].push_back(n);
+            _out_arcs[n].clear();
+            for (OutArcIt a(_gr, n); a != INVALID; ++a) {
+              _out_arcs[n].push_back(a);
+            }
+          }
+        } else {
+          for (int i = 0; i < _comp_num; ++i)
+            _comp_nodes[i].clear();
+          for (NodeIt n(_gr); n != INVALID; ++n) {
+            int k = _comp[n];
+            _comp_nodes[k].push_back(n);
+            _out_arcs[n].clear();
+            for (OutArcIt a(_gr, n); a != INVALID; ++a) {
+              if (_comp[_gr.target(a)] == k) _out_arcs[n].push_back(a);
+            }
+          }
+        }
+      }
+
+      // Initialize path data for the current component
+      bool initComponent(int comp) {
+        _nodes = &(_comp_nodes[comp]);
+        int n = _nodes->size();
+        if (n < 1 || (n == 1 && _out_arcs[(*_nodes)[0]].size() == 0)) { return false; }
+        for (int i = 0; i < n; ++i) {
+          _data[(*_nodes)[i]].resize(n + 1, PathData(INF));
+        }
+        return true;
+      }
+
+      // Process all rounds of computing path data for the current component.
+      // _data[v][k] is the cost of a shortest directed walk from the root
+      // node to node v containing exactly k arcs.
+      void processRounds() {
+        Node start = (*_nodes)[0];
+        _data[start][0] = PathData(0);
+        _process.clear();
+        _process.push_back(start);
+
+        int k, n = _nodes->size();
+        for (k = 1; k <= n && int(_process.size()) < n; ++k) {
+          processNextBuildRound(k);
+        }
+        for (; k <= n; ++k) {
+          processNextFullRound(k);
+        }
+      }
+
+      // Process one round and rebuild _process
+      void processNextBuildRound(int k) {
+        nt::TrivialDynamicArray< Node > next;
+        Node                            u, v;
+        Arc                             e;
+        LargeCost                       d;
+        for (int i = 0; i < int(_process.size()); ++i) {
+          u = _process[i];
+          for (int j = 0; j < int(_out_arcs[u].size()); ++j) {
+            e = _out_arcs[u][j];
+            v = _gr.target(e);
+            d = _data[u][k - 1].dist + _cost[e];
+            if (_tolerance.less(d, _data[v][k].dist)) {
+              if (_data[v][k].dist == INF) next.push_back(v);
+              _data[v][k] = PathData(d, e);
+            }
+          }
+        }
+        _process = std::move(next);
+      }
+
+      // Process one round using _nodes instead of _process
+      void processNextFullRound(int k) {
+        Node      u, v;
+        Arc       e;
+        LargeCost d;
+        for (int i = 0; i < int(_nodes->size()); ++i) {
+          u = (*_nodes)[i];
+          for (int j = 0; j < int(_out_arcs[u].size()); ++j) {
+            e = _out_arcs[u][j];
+            v = _gr.target(e);
+            d = _data[u][k - 1].dist + _cost[e];
+            if (_tolerance.less(d, _data[v][k].dist)) { _data[v][k] = PathData(d, e); }
+          }
+        }
+      }
+
+      // Update the minimum cycle mean
+      void updateMinMean() {
+        int n = _nodes->size();
+        for (int i = 0; i < n; ++i) {
+          Node u = (*_nodes)[i];
+          if (_data[u][n].dist == INF) continue;
+          LargeCost cost, max_cost = 0;
+          int       size, max_size = 1;
+          bool      found_curr = false;
+          for (int k = 0; k < n; ++k) {
+            if (_data[u][k].dist == INF) continue;
+            cost = _data[u][n].dist - _data[u][k].dist;
+            size = n - k;
+            if (!found_curr || cost * max_size > max_cost * size) {
+              found_curr = true;
+              max_cost = cost;
+              max_size = size;
+            }
+          }
+          if (found_curr && (_cycle_node == INVALID || max_cost * _cycle_size < _cycle_cost * max_size)) {
+            _cycle_cost = max_cost;
+            _cycle_size = max_size;
+            _cycle_node = u;
+          }
+        }
+      }
+
+    };   // class KarpMmc
+
+    /** @} */
+
+  }   // namespace graphs
+}   // namespace nt
+
+#endif   // _NT_KARP_MMC_H_

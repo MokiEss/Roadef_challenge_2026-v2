@@ -1,0 +1,14 @@
+1- Instance is a structure for the network topology and the traffic matrix
+2- result_builder is a structure for the objective functions
+3- Scenario is a structure for the budget and the number of segments
+4- loadAndCheckTeInstance: load the network topology and the traffic matrix file in Instance object
+5- loadAndCheckScenario: load the scenario data of the instance in the Scenario object and some display data in result_builder
+6- RoutingScheme is a structure for the solution : it contains the segments routing paths saved in a 4d array called _td_srpath
+7- loadAndCheckSrPaths: load a solution from a json file into RoutingScheme, the max segments constraints is also checked
+there for every segment routing path in the solution.
+8- checkBudgetConstraint: check the budget and the max segments constraints.
+9- simulateSegmentRouting function performs the routing using the solution and computes the objective functions that will be saved in result_builder
+
+
+
+
