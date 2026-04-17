@@ -356,7 +356,6 @@ double solution::computeMLU(int time_slot, const RoutingScheme& test_rs, int& mo
         most_congested_arc_id = -1;
         return std::numeric_limits<double>::infinity(); // Invalid routing
     }
-
     double f_mlu = 0.;
     most_congested_arc_id = -1;
     nt::Pair< Arc, double >  most = sr.mostLoadedArc(inst.capacities) ;
@@ -418,7 +417,7 @@ void solution::computeAllPairsShortestPaths(NetworkPrecompute& precomp) {
 
 
 
-bool solution::newHeuristicRun() {
+int solution::newHeuristicRun() {
     result_builder.setValid(true);
     vector<int> costInterventions(inst.demand_graph.arcNum(),0);
     std::vector<vector<int>> nbSegmentsByDemand(inst.i_num_time_slots, vector<int>(inst.demand_graph.arcNum(), 1));
@@ -586,5 +585,5 @@ bool solution::newHeuristicRun() {
     result_builder._i_total_segments = 0;
     result_builder._i_total_srpaths = 0;
     result_builder.setValid(false);
-    return true;
+    return total_cost;
 }

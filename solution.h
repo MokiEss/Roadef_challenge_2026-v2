@@ -56,7 +56,7 @@ public:
     int max_segments,int requested_waypoints) const;
 
 
-    bool newHeuristicRun();
+    int newHeuristicRun();
     double computeMLU(int time_slot, const RoutingScheme& test_rs, int& most_congested_arc_id);
     double computeMLU(SegmentRouting & sr, int time_slot,  int& most_congested_arc_id,
     DemandArc demand_arc,const SrPathBit& old_path, const SrPathBit& path, Digraph::ArcMap<DemandArray> & dpa, bool update);

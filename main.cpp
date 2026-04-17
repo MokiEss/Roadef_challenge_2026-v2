@@ -1,7 +1,7 @@
 // main.cpp
 
 #include "solver.h"
-
+#include <chrono>  // Add this include
 
 #include "readerInstance.h"
 
@@ -18,8 +18,12 @@ int main() {
     PreprocessingEngine engine = readAndPreprocess( nInstance, inst, use_ftxui, result_builder, scenario);
 
     solver s(inst, use_ftxui, result_builder, scenario, sr);
+    // Start timer
+    auto start = std::chrono::high_resolution_clock::now();
     s.optimize();
-    // Validate budget constraints
-
+    // End timer
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+    std::cout << "Optimization time: " << duration.count() << " seconds" << std::endl;
     return 0;
 }

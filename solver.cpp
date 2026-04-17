@@ -3,8 +3,8 @@
 //
 #include "solver.h"
 
-bool solver::isBetter(const vector<double> & sat1, const vector<double> & sat2, int & where) {
-    bool equal = true ;
+bool solver::isBetter(const vector<double> & sat1, const vector<double> & sat2, int & where, bool & equal) {
+    equal = true ;
 
     int i = 0 ;
     while (i < sat1.size() && equal==true) {
@@ -15,18 +15,14 @@ bool solver::isBetter(const vector<double> & sat1, const vector<double> & sat2, 
     return sat1[i-1] < sat2[i-1] ;
 }
 
+void solver::route_solution(solution & sol, int t,Digraph::ArcMap<DemandArray> & dpa) {
 
-
-int solver::getOneOfTheMostCongestedArcs(const solution& sol, int t) {
-    // Route at time slot t to get current saturation state and dpa
-
-    InterventionGuard intervention_guard(inst.network, inst.metrics, scenario.interventions[t]);
-    Digraph::ArcMap<DemandArray> dpa(sol.inst.network);
     sol.sr.clear();
     sol.sr.run(sol.inst.demand_graph, sol.inst.dvms[t], sol.rs.getSrPathsAt(t), dpa);
-    /*auto most = sol.sr.mostLoadedArc(sol.inst.capacities);
-    int congested = inst.network.id(most.first);
-    return congested ;*/
+}
+
+int solver::getOneOfTheMostCongestedArcs(const solution& sol, int t) {
+
     // Step 1: collect all arcs with their saturation as roulette wheel weights.
     std::vector<std::pair<Arc, double>> arc_saturations;
     arc_saturations.reserve(sol.inst.network.arcNum());
@@ -62,15 +58,10 @@ int solver::getOneOfTheMostCongestedArcs(const solution& sol, int t) {
     return sol.inst.network.id(arc_saturations.back().first);
 }
 
-DemandArc solver::getOneOfTheMostContributingDemandsToArc(const solution& sol, int arc_id, int t) {
-    InterventionGuard intervention_guard(inst.network, inst.metrics, scenario.interventions[t]);
+DemandArc solver::getOneOfTheMostContributingDemandsToArc(const solution& sol, int arc_id, int t,
+    const Digraph::ArcMap<DemandArray> & dpa) {
     Arc arc = sol.inst.network.arcFromId(arc_id);
     if (arc == nt::INVALID) return nt::INVALID;
-
-    // Route at time slot t to get dpa (demands per arc)
-    Digraph::ArcMap<DemandArray> dpa(sol.inst.network);
-    sol.sr.clear();
-    sol.sr.run(sol.inst.demand_graph, sol.inst.dvms[t], sol.rs.getSrPathsAt(t), dpa);
 
     // dpa[arc] contains all demands that route through this arc at time slot t
     const DemandArray& demands_on_arc = dpa[arc];
@@ -138,14 +129,27 @@ DemandArc solver::getOneOfTheMostContributingDemandsToArc(const solution& sol, i
 double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da, int t, neighbor & m) {
     SrPathBit& path = sol.rs.getSrPath(t, da);
     SrPathBit backup;
+    int old_cost = total_cost ;
+    int old_cost_demand = (t == 0) ?
+                        dist(sol.rs.getSrPath(t + 1 , da), path)
+                        : dist(sol.rs.getSrPath(t - 1, da), path);
+
+    old_cost-=old_cost_demand ;
     backup.copyFrom(path);
     Node source = sol.inst.demand_graph.source(da);
     m.da = da ;
+    int iter = 0;
     // Check if path has waypoints (segment count > 2 means at least 1 waypoint)
     bool has_waypoints = (path.segmentNum() > 2);
     double new_mlu = 0.0;
-
-    if (has_waypoints) {
+    double budget = (t == 0) ? scenario.budget[t+1] : scenario.budget[t] ;
+    do {
+        iter++;
+        path.copyFrom(backup);
+        // initialize move
+        m.replace = false ; m.add = false ; m.remove = false ;m.index_wp_add=-1; m.index_wp_remove=-1;
+        // initialize path
+        if (has_waypoints) {
         double rand_val = genRandomDouble(1.0);
 
         if (rand_val < 0.2) {
@@ -155,17 +159,18 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
 
                 int wp_index = genRandomInt(num_waypoints);
                 sol.removeWayPointFromExistingPath(path[wp_index + 1].toNode(), path, da);
+
                 m.remove = true ;
                 m.index_wp_remove = wp_index ;
             }
         }
         else {
              // Add a waypoint
-             if (rand_val < 0.3) {
+             if (rand_val < 0.5) {
                  double rand_add = genRandomDouble(1.0);
                  std::vector<Node> candidates;
 
-                 if (rand_add < 0.7) {
+                 if (rand_add < 0.5) {
                      // Use only 1-hop neighbors
                      candidates = sol.getNeighbors(source, false);
 
@@ -217,12 +222,11 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
              }
          }
     }
-    else {
+        else {
         // No waypoints yet, always add one
         double rand_add = genRandomDouble(1.0);
         std::vector<Node> candidates;
-
-        if (rand_add < 0.7) {
+        if (rand_add < 0.5) {
             // Use only 1-hop neighbors
             candidates = sol.getNeighbors(source, false);
         } else {
@@ -238,11 +242,17 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
             sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments);
         }
     }
+        m.cost_move = (t == 0) ? dist(sol.rs.getSrPath(t + 1 , da), path) :
+                    dist(sol.rs.getSrPath(t - 1, da), path);
+
+    } while ( (old_cost + m.cost_move > budget && iter < 10));
 
     // Evaluate the new path and compute MLU
-    InterventionGuard intervention_guard(sol.inst.network, sol.inst.metrics, sol.scenario.interventions[t]);
+
     Digraph::ArcMap<DemandArray> dpa(sol.inst.network);
     int most_congested_arc_id ;
+
+
     new_mlu = sol.computeMLU(sol.sr, t,  most_congested_arc_id,da,
         backup, path, dpa, true ) ;
 
@@ -259,7 +269,8 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
     double f = sol.computeMLU(sol.sr, t,  most_congested_arc_id,da,
         path, backup , dpa, true ) ;
 
-    path.copyFrom(backup);
+    path = std::move(backup);
+
     return new_mlu;
 }
 
@@ -292,12 +303,10 @@ void solver::apply_move_to_solution(solution & sol, const neighbor & m, int t) {
         }
     }
 
-    InterventionGuard intervention_guard(sol.inst.network, sol.inst.metrics, sol.scenario.interventions[t]);
     Digraph::ArcMap<DemandArray> dpa(sol.inst.network);
     int most_congested_arc_id ;
     sol.solution_mlu[t] = sol.computeMLU(sol.sr, t,  most_congested_arc_id,m.da,
         backup, path, dpa, true ) ;
-
 
 }
 
@@ -305,44 +314,60 @@ void solver::optimize() {
 
     // 1- initial solution
     solution s(inst, use_ftxui, result_builder, scenario, sr );
-    s.newHeuristicRun();
+    total_cost = s.newHeuristicRun();
 
+    int nbNeighbors = 30;
     // 2- generate 10 neighbors of initial solution by applying moves on them in while loop and keep always the best of them to
     //  replace the initial solution by the neighbor if the neighbor is better.
     for (int t = 0 ; t < inst.i_num_time_slots ; t++) {
+        InterventionGuard intervention_guard(s.inst.network, s.inst.metrics, s.scenario.interventions[t]);
         std::cout << "=== Time Slot " << t << std::endl;
         int iterations = 1000 ;
-        int nbNeighbors = 100;
+
         while (iterations--) {
             vector<neighbor> moves(nbNeighbors) ;
             vector<double> mlu_neighbors(nbNeighbors) ;
-
+            vector<DemandArc> demand_neighbors(nbNeighbors) ;
+            Digraph::ArcMap<DemandArray> dpa(s.inst.network);
+            route_solution(s, t,dpa);
             for (int i = 0 ; i < nbNeighbors ; i++) {
                 int arc_id = getOneOfTheMostCongestedArcs(s, t);
                 if (arc_id == -1) continue;
-                DemandArc da = getOneOfTheMostContributingDemandsToArc(s, arc_id, t);
-                if (da == nt::INVALID) continue;
-
-                mlu_neighbors[i] = update_sr_path_for_demand_arcs(s, da, t,moves[i]);
-
+                demand_neighbors[i] = getOneOfTheMostContributingDemandsToArc(s, arc_id, t,dpa);
+                if (demand_neighbors[i] == nt::INVALID) continue;
+                mlu_neighbors[i] = update_sr_path_for_demand_arcs(s, demand_neighbors[i], t,moves[i]);
             }
             // find the best neighbor
             int best_neighbor_index = 0 ;
             int where = -1 ;
             for (int i = 1 ; i < nbNeighbors ; i++) {
-                if (isBetter(moves[i].saturations, moves[best_neighbor_index].saturations, where)) {
+                bool equal ;
+                if (isBetter(moves[i].saturations, moves[best_neighbor_index].saturations, where,equal)) {
                     best_neighbor_index = i ;
                 }
+                else {
+                    if (equal && moves[i].cost_move < moves[best_neighbor_index].cost_move) {
+                        best_neighbor_index = i ;
+                    }
+                }
             }
-
-
-
-            if (isBetter(moves[best_neighbor_index].saturations,s.solution_saturations[t] , where)) {
+            bool equal ;
+            int old_cost_demand = (t == 0) ?
+            dist(s.rs.getSrPath(t ,demand_neighbors[best_neighbor_index])
+                    , s.rs.getSrPath(t+1, demand_neighbors[best_neighbor_index])) :
+            dist(s.rs.getSrPath(t - 1,demand_neighbors[best_neighbor_index])
+                    , s.rs.getSrPath(t, demand_neighbors[best_neighbor_index]));
+            double budget = (t == 0) ? scenario.budget[t+1] : scenario.budget[t] ;
+            if (isBetter(moves[best_neighbor_index].saturations,s.solution_saturations[t] , where,equal)
+                && ( ((total_cost-old_cost_demand) + moves[best_neighbor_index].cost_move) <= budget)) {
                 // Apply the best move to the solution
-                apply_move_to_solution(s, moves[best_neighbor_index],  t);
+                total_cost -= old_cost_demand;
                 s.solution_saturations[t] = moves[best_neighbor_index].saturations ;
+                apply_move_to_solution(s, moves[best_neighbor_index],  t);
+                total_cost+=moves[best_neighbor_index].cost_move ;
                 cout << "MLU improved " << s.solution_saturations[t][where] << " on the "<<
-                    where+1 <<" most saturated arc" << endl ;
+                    where+1 <<" most saturated arc and total cost is " << total_cost <<  endl ;
+
             }
 
 
@@ -354,7 +379,7 @@ void solver::optimize() {
     }
 
 
-
+    cout << "total cost is " << total_cost << endl ;
 
 
 
