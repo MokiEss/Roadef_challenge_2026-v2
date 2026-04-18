@@ -5,24 +5,47 @@
 #include "solution.h"
 
 
-vector<Node> solution::getNeighbors(const Node& source, bool TwoHops) const {
+vector<Node> solution::getNeighbors(const Node& source, const Node& target, const Node& ds,
+    const Node& dt, bool twoHops) const {
     vector<Node> neighbors;
+    nt::graphs::NodeSet<Digraph> seen(inst.network);
+
+    auto has_direct_connection = [&](Node a, Node b) -> bool {
+        for (OutArcIt e(inst.network, a); e != nt::INVALID; ++e) {
+            if (inst.network.target(e) == b) return true;
+        }
+        return false;
+    };
+
+    auto add_if_valid = [&](Node n) {
+        if (n == nt::INVALID || n == source || n == target|| n == ds || n == dt) return;
+        if (!seen.contains(n)) {
+            seen.insert(n);
+            neighbors.push_back(n);
+        }
+    };
+
     for (OutArcIt a(inst.network, source); a != nt::INVALID; ++a) {
-        Node neigh = inst.network.target(a);
-        if (neigh != source) {
-            neighbors.push_back(neigh);
-            if (TwoHops) {
-                for (OutArcIt b(inst.network, neigh); b != nt::INVALID; ++b) {
-                    Node neigh2 = inst.network.target(b);
-                    if (neigh2 != neigh && neigh2 != source) {
-                        neighbors.push_back(neigh2);
-                    }
-                }
+        const Node neigh = inst.network.target(a);
+        add_if_valid(neigh);
+
+        if (!twoHops) continue;
+
+        for (OutArcIt b(inst.network, neigh); b != nt::INVALID; ++b) {
+            const Node neigh2 = inst.network.target(b);
+
+            // neigh2 est autorisé seulement s'il n'existe pas de connexion directe avec target
+            const bool connected_to_target =
+                 has_direct_connection(target, neigh2);
+
+            if (!connected_to_target) {
+                add_if_valid(neigh2);
             }
         }
     }
     return neighbors;
 }
+
 
 
 
@@ -179,7 +202,7 @@ bool solution::insertWaypointsIntoExistingPath(
     for (Node w : waypoints) {
         if (w == nt::INVALID) continue;
         if (w == path_source || w == path_target) continue;
-        if (used.contains(w)) continue;
+        if (used.contains(w)) continue ;
 
         to_insert.push_back(w);
         used.insert(w);

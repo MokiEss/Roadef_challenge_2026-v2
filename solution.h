@@ -74,7 +74,8 @@ public:
                                     const SrPathBit& path);
     void computeAllPairsShortestPaths(NetworkPrecompute& precomp) ;
     Node selectGeometricWaypoint(Node s, Node d, Arc worst_arc, const NetworkPrecompute& precomp) const;
-    vector<Node> getNeighbors(const Node& source, bool TwoHops) const;
+    vector<Node> getNeighbors(const Node& source, const Node & target, const Node& ds,
+    const Node& dt, bool TwoHops) const;
 
 
 

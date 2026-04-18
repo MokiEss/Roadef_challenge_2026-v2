@@ -4,6 +4,9 @@
 #include "solver.h"
 
 bool solver::isBetter(const vector<double> & sat1, const vector<double> & sat2, int & where, bool & equal) {
+    if(sat1.size()!=sat2.size()) {
+        throw std::invalid_argument("Saturation vectors must be of the same size");
+    }
     equal = true ;
 
     int i = 0 ;
@@ -21,7 +24,7 @@ void solver::route_solution(solution & sol, int t,Digraph::ArcMap<DemandArray> &
     sol.sr.run(sol.inst.demand_graph, sol.inst.dvms[t], sol.rs.getSrPathsAt(t), dpa);
 }
 
-int solver::getOneOfTheMostCongestedArcs(const solution& sol, int t) {
+int solver::getOneOfTheMostCongestedArcs(const solution& sol) {
 
     // Step 1: collect all arcs with their saturation as roulette wheel weights.
     std::vector<std::pair<Arc, double>> arc_saturations;
@@ -126,7 +129,7 @@ DemandArc solver::getOneOfTheMostContributingDemandsToArc(const solution& sol, i
 }
 
 
-double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da, int t, neighbor & m) {
+double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da, int arc_id, int t, neighbor & m) {
     SrPathBit& path = sol.rs.getSrPath(t, da);
     SrPathBit backup;
     int old_cost = total_cost ;
@@ -136,7 +139,11 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
 
     old_cost-=old_cost_demand ;
     backup.copyFrom(path);
-    Node source = sol.inst.demand_graph.source(da);
+    Arc congested_arc = sol.inst.network.arcFromId(arc_id);
+    Node source = sol.inst.network.source(congested_arc);
+    Node target = sol.inst.network.target(congested_arc);
+    Node ds = sol.inst.demand_graph.source(da);
+    Node dt = sol.inst.demand_graph.target(da);
     m.da = da ;
     int iter = 0;
     // Check if path has waypoints (segment count > 2 means at least 1 waypoint)
@@ -147,19 +154,17 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
         iter++;
         path.copyFrom(backup);
         // initialize move
-        m.replace = false ; m.add = false ; m.remove = false ;m.index_wp_add=-1; m.index_wp_remove=-1;
+        m.valid = false ; m.replace = false ; m.add = false ;
+        m.remove = false ;m.index_wp_add=-1; m.index_wp_remove=-1;
         // initialize path
         if (has_waypoints) {
         double rand_val = genRandomDouble(1.0);
-
-        if (rand_val < 0.2) {
             // Remove a random waypoint
-            int num_waypoints = path.segmentNum() - 2;
-            if (num_waypoints > 0) {
-
-                int wp_index = genRandomInt(num_waypoints);
-                sol.removeWayPointFromExistingPath(path[wp_index + 1].toNode(), path, da);
-
+        int num_waypoints = path.segmentNum() - 2;
+        if (num_waypoints > 0 && rand_val < 0.2) {
+            int wp_index = genRandomInt(num_waypoints);
+            if(sol.removeWayPointFromExistingPath(path[wp_index + 1].toNode(), path, da)) {
+                // removal successful
                 m.remove = true ;
                 m.index_wp_remove = wp_index ;
             }
@@ -172,32 +177,32 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
 
                  if (rand_add < 0.5) {
                      // Use only 1-hop neighbors
-                     candidates = sol.getNeighbors(source, false);
+                     candidates = sol.getNeighbors(source, target,ds, dt, false);
 
                  } else {
                      // Use both 1-hop and 2-hop neighbors
-                     candidates = sol.getNeighbors(source, true);
+                     candidates = sol.getNeighbors(source, target,ds,dt, true);
                  }
 
                  if (!candidates.empty()) {
-
                      int idx = genRandomInt(candidates.size());
                      std::vector<Node> waypoints = {candidates[idx]};
-                     m.add = true ;
-                     m.index_wp_add = inst.network.id(candidates[idx]) ;
-                     sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments);
+                     if(sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments)) {
+                         // insertion successful
+                         m.add = true ;
+                         m.index_wp_add = sol.inst.network.id(candidates[idx]) ;
+                     }
                  }
              }
              else {
                  // replace one way point with another
                  // remove a random waypoint
-                 m.replace = true ;
+
                  int num_waypoints = path.segmentNum() - 2;
                  if (num_waypoints > 0) {
-
                      int wp_index = genRandomInt(num_waypoints);
-                     m.index_wp_remove = wp_index ;
-                     sol.removeWayPointFromExistingPath(path[wp_index + 1].toNode(), path, da);
+                     m.replace = sol.removeWayPointFromExistingPath(path[wp_index + 1].toNode(), path, da);
+                     if(m.replace) m.index_wp_remove = wp_index ;
                  }
                  // add a new waypoint
                  double rand_add = genRandomDouble(1.0);
@@ -205,19 +210,22 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
 
                  if (rand_add < 0.7) {
                      // Use only 1-hop neighbors
-                     candidates = sol.getNeighbors(source, false);
+                     candidates = sol.getNeighbors(source, target, ds, dt, false);
 
                  } else {
                      // Use both 1-hop and 2-hop neighbors
-                     candidates = sol.getNeighbors(source, true);
+                     candidates = sol.getNeighbors(source, target, ds, dt, true);
                  }
 
                  if (!candidates.empty()) {
 
                      int idx = genRandomInt(candidates.size());
                      std::vector<Node> waypoints = {candidates[idx]};
-                     m.index_wp_add = inst.network.id(candidates[idx]) ;
-                     sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments);
+
+                     if(m.replace && sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments)) {
+                         // insertion successful
+                         m.index_wp_add = sol.inst.network.id(candidates[idx]) ;
+                     }
                  }
              }
          }
@@ -228,25 +236,28 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
         std::vector<Node> candidates;
         if (rand_add < 0.5) {
             // Use only 1-hop neighbors
-            candidates = sol.getNeighbors(source, false);
+            candidates = sol.getNeighbors(source, target, ds, dt, false);
         } else {
             // Use both 1-hop and 2-hop neighbors
-            candidates = sol.getNeighbors(source, true);
+            candidates = sol.getNeighbors(source, target, ds, dt,  true);
         }
 
         if (!candidates.empty()) {
-            m.add = true ;
             int idx = genRandomInt(candidates.size());
             std::vector<Node> waypoints = {candidates[idx]};
-            m.index_wp_add = inst.network.id(candidates[idx]) ;
-            sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments);
+
+            if(sol.insertWaypointsIntoExistingPath(path, da, waypoints, sol.scenario.i_max_segments)) {
+                // insertion successful
+                m.add = true ;
+                m.index_wp_add = sol.inst.network.id(candidates[idx]) ;
+            }
         }
     }
         m.cost_move = (t == 0) ? dist(sol.rs.getSrPath(t + 1 , da), path) :
                     dist(sol.rs.getSrPath(t - 1, da), path);
 
     } while ( (old_cost + m.cost_move > budget && iter < 10));
-
+    if (iter < 10 && (m.add or m.remove or m.replace)) m.valid = true ;
     // Evaluate the new path and compute MLU
 
     Digraph::ArcMap<DemandArray> dpa(sol.inst.network);
@@ -256,8 +267,8 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
     new_mlu = sol.computeMLU(sol.sr, t,  most_congested_arc_id,da,
         backup, path, dpa, true ) ;
 
-    for (ArcIt arc(inst.network); arc != nt::INVALID; ++arc) {
-        m.saturations.push_back(sol.sr.saturation(arc, inst.capacities[arc])) ;
+    for (ArcIt arc(sol.inst.network); arc != nt::INVALID; ++arc) {
+        m.saturations.push_back(sol.sr.saturation(arc, sol.inst.capacities[arc])) ;
     }
     std::sort(
     m.saturations.begin(),
@@ -285,14 +296,14 @@ void solver::apply_move_to_solution(solution & sol, const neighbor & m, int t) {
         }
         // add a new waypoint
         if (m.index_wp_add !=-1) {
-            std::vector<Node> waypoints = {inst.network.nodeFromId(m.index_wp_add)};
+            std::vector<Node> waypoints = {sol.inst.network.nodeFromId(m.index_wp_add)};
             sol.insertWaypointsIntoExistingPath(path, m.da, waypoints, sol.scenario.i_max_segments);
         }
     }
     else {
         if (m.add) {
             if (m.index_wp_add !=-1) {
-                std::vector<Node> waypoints = {inst.network.nodeFromId(m.index_wp_add)};
+                std::vector<Node> waypoints = {sol.inst.network.nodeFromId(m.index_wp_add)};
                 sol.insertWaypointsIntoExistingPath(path, m.da, waypoints, sol.scenario.i_max_segments);
             }
         }
@@ -319,23 +330,23 @@ void solver::optimize() {
     int nbNeighbors = 30;
     // 2- generate 10 neighbors of initial solution by applying moves on them in while loop and keep always the best of them to
     //  replace the initial solution by the neighbor if the neighbor is better.
-    for (int t = 0 ; t < inst.i_num_time_slots ; t++) {
+    for (int t = 0 ; t < s.inst.i_num_time_slots ; t++) {
         InterventionGuard intervention_guard(s.inst.network, s.inst.metrics, s.scenario.interventions[t]);
         std::cout << "=== Time Slot " << t << std::endl;
         int iterations = 1000 ;
 
         while (iterations--) {
             vector<neighbor> moves(nbNeighbors) ;
-            vector<double> mlu_neighbors(nbNeighbors) ;
+            double mlu_neighbors  ;
             vector<DemandArc> demand_neighbors(nbNeighbors) ;
             Digraph::ArcMap<DemandArray> dpa(s.inst.network);
             route_solution(s, t,dpa);
             for (int i = 0 ; i < nbNeighbors ; i++) {
-                int arc_id = getOneOfTheMostCongestedArcs(s, t);
+                int arc_id = getOneOfTheMostCongestedArcs(s);
                 if (arc_id == -1) continue;
                 demand_neighbors[i] = getOneOfTheMostContributingDemandsToArc(s, arc_id, t,dpa);
                 if (demand_neighbors[i] == nt::INVALID) continue;
-                mlu_neighbors[i] = update_sr_path_for_demand_arcs(s, demand_neighbors[i], t,moves[i]);
+                mlu_neighbors = update_sr_path_for_demand_arcs(s, demand_neighbors[i], arc_id, t,moves[i]);
             }
             // find the best neighbor
             int best_neighbor_index = 0 ;
@@ -358,7 +369,8 @@ void solver::optimize() {
             dist(s.rs.getSrPath(t - 1,demand_neighbors[best_neighbor_index])
                     , s.rs.getSrPath(t, demand_neighbors[best_neighbor_index]));
             double budget = (t == 0) ? scenario.budget[t+1] : scenario.budget[t] ;
-            if (isBetter(moves[best_neighbor_index].saturations,s.solution_saturations[t] , where,equal)
+            if (moves[best_neighbor_index].valid == true &&
+                isBetter(moves[best_neighbor_index].saturations,s.solution_saturations[t] , where,equal)
                 && ( ((total_cost-old_cost_demand) + moves[best_neighbor_index].cost_move) <= budget)) {
                 // Apply the best move to the solution
                 total_cost -= old_cost_demand;
@@ -380,13 +392,6 @@ void solver::optimize() {
 
 
     cout << "total cost is " << total_cost << endl ;
-
-
-
-
-
-
-
 
     // ===== END OF LOOP =====
     // In solver::optimize() before calling simulateSegmentRouting
