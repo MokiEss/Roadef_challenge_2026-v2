@@ -35,9 +35,9 @@ public:
     } ;
 
     // route the whole solution
-    void route_solution(solution & sol, int t,Digraph::ArcMap<DemandArray> & dpa);
+    int route_solution(solution & sol, int t,Digraph::ArcMap<DemandArray> & dpa);
     // using roulette wheel, select one of the most congested arcs of a solution given in parameter
-    int getOneOfTheMostCongestedArcs(const solution & sol);
+    int getOneOfTheMostCongestedArcs(const solution & sol, int most_congested);
     // using roulette wheel, select one of the most contributing demands to an arc given in parameter
     DemandArc getOneOfTheMostContributingDemandsToArc(const solution & sol, int arc, int t,const Digraph::ArcMap<DemandArray> & dpa);
 
