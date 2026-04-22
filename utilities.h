@@ -12,7 +12,7 @@
 #include "checker.h"
 #include <string>
 #include <random>
-
+#include <fstream>
 using namespace std;
 
 

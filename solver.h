@@ -21,6 +21,7 @@ struct neighbor {
 class solver {
 
 public:
+    string nInstance;
     int total_cost ;
     Instance   &   inst;
     bool use_ftxui = false ;
@@ -29,8 +30,8 @@ public:
     RoutingScheme * rs;
     int i_max_decimal_places = 12;
     SegmentRouting & sr ;
-    solver(Instance   &   inst, bool use_ftxui, ResultBuilder & result_builder, Scenario & scenario, SegmentRouting & sr):inst(inst),use_ftxui(use_ftxui),
-            result_builder(result_builder),scenario(scenario), sr(sr) {
+    solver(string nInstance, Instance   &   inst, bool use_ftxui, ResultBuilder & result_builder, Scenario & scenario, SegmentRouting & sr):inst(inst),use_ftxui(use_ftxui),
+            result_builder(result_builder),scenario(scenario), sr(sr), nInstance(nInstance) {
         rs = new RoutingScheme(inst) ;
     } ;
 

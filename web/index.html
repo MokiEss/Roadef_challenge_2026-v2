@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T-ASR Solver Visualization — ROADEF/EURO 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Top Bar -->
+        <header id="top-bar">
+            <div class="logo">T-ASR Visualizer</div>
+            <div class="instance-info" id="instance-info">No instance loaded</div>
+            <div class="controls-bar">
+                <label for="file-input" class="btn btn-primary">Load Solver State</label>
+                <input type="file" id="file-input" accept=".json" style="display:none">
+                <button class="btn btn-secondary" id="btn-load-instance">Load Instance Files</button>
+                <button class="btn btn-secondary" id="btn-load-sample">Load Sample</button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div id="main-layout">
+            <!-- Left Panel: Controls & Navigation -->
+            <div id="left-panel" class="panel">
+                <div class="panel-section">
+                    <h3>Navigation</h3>
+                    <div class="nav-controls">
+                        <div class="nav-row">
+                            <label>Iteration:</label>
+                            <button id="btn-prev-iter" class="btn btn-sm">&lt;</button>
+                            <span id="iter-display">0/0</span>
+                            <button id="btn-next-iter" class="btn btn-sm">&gt;</button>
+                        </div>
+                        <div class="nav-row">
+                            <label>Timestep:</label>
+                            <button id="btn-prev-time" class="btn btn-sm">&lt;</button>
+                            <span id="time-display">0/0</span>
+                            <button id="btn-next-time" class="btn btn-sm">&gt;</button>
+                        </div>
+                        <input type="range" id="iter-slider" min="0" max="0" value="0" class="slider">
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Objective</h3>
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">MLU</div>
+                            <div class="metric-value" id="mlu-value">—</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Budget</div>
+                            <div class="metric-value" id="budget-value">—</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Violations</div>
+                            <div class="metric-value" id="violations-value">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Demands</div>
+                            <div class="metric-value" id="demands-count">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Top Loads</h3>
+                    <div id="top-loads-list" class="scrollable-list"></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Congested Arcs <span id="congested-time-label" class="section-time-label"></span></h3>
+                    <div class="sort-bar" id="arc-sort-bar">
+                        <span class="sort-label">Sort:</span>
+                        <button class="btn-sort" data-sort="id">ID</button>
+                        <button class="btn-sort" data-sort="from">Src</button>
+                        <button class="btn-sort" data-sort="to">Dst</button>
+                        <button class="btn-sort active" data-sort="load">MLU ▼</button>
+                    </div>
+                    <div id="congested-arcs-list" class="scrollable-list" style="max-height:180px;"></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Actions</h3>
+                    <div class="action-buttons">
+                        <button class="btn btn-action" id="btn-highlight-interventions">Highlight Interventions</button>
+                        <button class="btn btn-action" id="btn-reset-view">Reset View</button>
+                        <button class="btn btn-action" id="btn-export-state">Export Current State</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Violations</h3>
+                    <div id="violations-list" class="scrollable-list"></div>
+                </div>
+            </div>
+
+            <!-- Center: Network Graph -->
+            <div id="center-panel">
+                <div id="graph-toolbar">
+                    <button class="btn btn-sm" id="btn-fit">Fit</button>
+                    <button class="btn btn-sm" id="btn-zoom-in">+</button>
+                    <button class="btn btn-sm" id="btn-zoom-out">−</button>
+                    <span class="separator">|</span>
+                    <label><input type="checkbox" id="chk-show-labels" checked> Labels</label>
+                    <label><input type="checkbox" id="chk-show-mlu" checked> MLU</label>
+                    <label><input type="checkbox" id="chk-show-distance"> Distance</label>
+                    <label><input type="checkbox" id="chk-color-by-load" checked> Color by Load</label>
+                    <label><input type="checkbox" id="chk-no-revisit"> No Revisit</label>
+                    <span class="separator">|</span>
+                    <label class="toolbar-label">Layout:</label>
+                    <select id="layout-select" class="toolbar-select">
+                        <option value="fcose" selected>fCoSE (Planar)</option>
+                        <option value="cose">CoSE (Force)</option>
+                        <option value="circle">Circle</option>
+                        <option value="grid">Grid</option>
+                        <option value="concentric">Concentric</option>
+                    </select>
+                    <button class="btn btn-sm" id="btn-relayout" title="Re-run layout">⟳ Layout</button>
+                </div>
+                <div id="cy"></div>
+                <div id="graph-legend" class="graph-legend">
+                    <div class="legend-title">Legend</div>
+                    <div class="legend-item"><span class="legend-color" style="background:#9ece6a"></span> Load &lt; 50%</div>
+                    <div class="legend-item"><span class="legend-color" style="background:#e0af68"></span> Load 50-80%</div>
+                    <div class="legend-item"><span class="legend-color" style="background:#ff9e64"></span> Load 80-100%</div>
+                    <div class="legend-item"><span class="legend-color" style="background:#f7768e"></span> Load &gt; 100%</div>
+                    <div class="legend-sep"></div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:#7aa2f7"></span> Source node</div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:#bb9af7"></span> Target node</div>
+                    <div class="legend-item"><span class="legend-swatch" style="background:#ff9e64"></span> Waypoint node</div>
+                    <div class="legend-item"><span class="legend-line" style="background:#9ece6a"></span> Shortest path</div>
+                    <div class="legend-item"><span class="legend-line" style="background:#73daca"></span> ECMP alt path</div>
+                    <div class="legend-sep"></div>
+                    <div class="legend-item"><span class="legend-color" style="background:#7aa2f7"></span> High flow (&gt;70%)</div>
+                    <div class="legend-item"><span class="legend-color" style="background:#73daca"></span> Medium flow (30-70%)</div>
+                    <div class="legend-item"><span class="legend-color" style="background:#9ece6a"></span> Low flow (&lt;30%)</div>
+                </div>
+                <div id="tooltip" class="hidden"></div>
+            </div>
+
+            <!-- Right Panel: Demand Table & Charts -->
+            <div id="right-panel" class="panel">
+                <div class="panel-tabs">
+                    <button class="tab active" data-tab="demands-tab">Demands</button>
+                    <button class="tab" data-tab="charts-tab">Charts</button>
+                    <button class="tab" data-tab="arc-detail-tab">Arc Detail</button>
+                    <button class="tab" data-tab="move-log-tab">Move Log</button>
+                </div>
+
+                <!-- Demands Tab -->
+                <div id="demands-tab" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" id="demand-search" placeholder="Search demands...">
+                    </div>
+                    <div class="multi-select-bar">
+                        <button class="btn btn-xs" id="btn-select-all-demands">Select All</button>
+                        <button class="btn btn-xs" id="btn-clear-selection">Clear</button>
+                        <button class="btn btn-xs" id="btn-select-congested">Congested</button>
+                        <span class="multi-select-count" id="multi-select-count"></span>
+                        <button class="btn btn-xs btn-primary" id="btn-show-selected-routes">Show Routes</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="demand-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-chk"><input type="checkbox" id="chk-select-all"></th>
+                                    <th class="sortable-th" data-sort="id">ID <span class="sort-arrow"></span></th>
+                                    <th class="sortable-th" data-sort="source">Src <span class="sort-arrow"></span></th>
+                                    <th class="sortable-th" data-sort="target">Tgt <span class="sort-arrow"></span></th>
+                                    <th class="sortable-th" data-sort="volume">Vol <span class="sort-arrow"></span></th>
+                                    <th>WP</th>
+                                    <th>Cong</th>
+                                </tr>
+                            </thead>
+                            <tbody id="demand-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="demand-detail" id="demand-detail">
+                        <h4>Demand Detail</h4>
+                        <div id="demand-detail-content">Select a demand to view details</div>
+
+                        <!-- Waypoint Editor -->
+                        <div id="waypoint-editor" class="waypoint-editor hidden">
+                            <h5>Edit Waypoints</h5>
+                            <div id="waypoint-list" class="waypoint-list"></div>
+                            <div class="waypoint-add-row">
+                                <select id="waypoint-node-select" class="wp-select">
+                                    <option value="">— add waypoint —</option>
+                                </select>
+                                <button class="btn btn-sm btn-wp-add" id="btn-add-waypoint">+ Add</button>
+                            </div>
+                            <div class="waypoint-actions">
+                                <button class="btn btn-sm btn-primary" id="btn-apply-waypoints">Apply &amp; Recompute</button>
+                                <button class="btn btn-sm btn-secondary" id="btn-reset-waypoints">Reset</button>
+                            </div>
+                            <div id="waypoint-result" class="waypoint-result hidden"></div>
+                        </div>
+
+                        <div class="demand-actions">
+                            <button class="btn btn-sm" id="btn-highlight-demand">Highlight Route</button>
+                            <button class="btn btn-sm" id="btn-show-flow">Show Flow</button>
+                            <button class="btn btn-sm" id="btn-show-segments">Show Segments</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Tab -->
+                <div id="charts-tab" class="tab-content">
+                    <div id="mlu-chart" class="chart-container"></div>
+                    <div id="load-distribution-chart" class="chart-container"></div>
+                    <div id="budget-chart" class="chart-container"></div>
+                </div>
+
+                <!-- Arc Detail Tab -->
+                <div id="arc-detail-tab" class="tab-content">
+                    <div id="arc-detail-content">Click an arc in the graph to view details</div>
+                    <div id="arc-demands-list" class="scrollable-list"></div>
+                    <div id="arc-load-chart" class="chart-container"></div>
+                </div>
+
+                <!-- Move Log Tab -->
+                <div id="move-log-tab" class="tab-content">
+                    <div id="move-log-list" class="scrollable-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instance Loading Modal -->
+    <div id="instance-modal" class="modal hidden">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content">
+            <h3>Load Instance Files</h3>
+            <p class="modal-desc">Load raw instance files (net, traffic matrix, scenario) and optionally a solution file with SR paths.</p>
+            <div class="modal-form">
+                <div class="modal-field">
+                    <label>Network (net.json) <span class="required">*</span></label>
+                    <input type="file" id="inst-net-file" accept=".json">
+                </div>
+                <div class="modal-field">
+                    <label>Traffic Matrix (tm.json) <span class="required">*</span></label>
+                    <input type="file" id="inst-tm-file" accept=".json">
+                </div>
+                <div class="modal-field">
+                    <label>Scenario (scenario.json) <span class="required">*</span></label>
+                    <input type="file" id="inst-scenario-file" accept=".json">
+                </div>
+                <div class="modal-field">
+                    <label>Solution — SR Paths (optional)</label>
+                    <input type="file" id="inst-solution-file" accept=".json">
+                    <div class="modal-hint">Format: {"srpaths": [{"d": id, "t": slot, "w": [waypoints]}]}. If omitted, demands use direct shortest-path routing (no waypoints).</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="btn-inst-load">Load</button>
+                <button class="btn btn-secondary" id="btn-inst-cancel">Cancel</button>
+            </div>
+            <div id="inst-load-error" class="modal-error hidden"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

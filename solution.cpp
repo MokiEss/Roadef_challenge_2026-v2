@@ -4,6 +4,118 @@
 
 #include "solution.h"
 
+vector<Node> solution::getPromisingWaypoints(
+    const Node& arc_source,      // source de l'arc congestionné
+    const Node& arc_target,      // target de l'arc congestionné
+    const Node& ds,              // source de la demande
+    const Node& dt,              // target de la demande
+    const Arc& worst_arc,
+    bool twoHops,
+    int top_k
+) const {
+    vector<Node> base;
+    nt::graphs::NodeSet<Digraph> seen(inst.network);
+
+    auto has_direct_connection = [&](Node a, Node b) -> bool {
+        for (OutArcIt e(inst.network, a); e != nt::INVALID; ++e) {
+            if (inst.network.target(e) == b) return true;
+        }
+        return false;
+    };
+
+    auto add_if_valid = [&](Node n) {
+        if (n == nt::INVALID || n == arc_source || n == arc_target || n == ds || n == dt) return;
+        if (!seen.contains(n)) {
+            seen.insert(n);
+            base.push_back(n);
+        }
+    };
+
+    // 1-hop + option 2-hop autour de arc_source (comme ton getNeighbors)
+    for (OutArcIt a(inst.network, arc_source); a != nt::INVALID; ++a) {
+        Node neigh = inst.network.target(a);
+        add_if_valid(neigh);
+
+        if (!twoHops) continue;
+
+        for (OutArcIt b(inst.network, neigh); b != nt::INVALID; ++b) {
+            Node neigh2 = inst.network.target(b);
+
+            // Ton filtre "downstream" conservé
+            if (!has_direct_connection(arc_target, neigh2)) {
+                add_if_valid(neigh2);
+            }
+        }
+    }
+
+    if (base.empty()) return base;
+
+    const Node u = inst.network.source(worst_arc);
+    const Node v = inst.network.target(worst_arc);
+
+    const int ds_id = inst.network.id(ds);
+    const int dt_id = inst.network.id(dt);
+    const int u_id  = inst.network.id(u);
+    const int v_id  = inst.network.id(v);
+
+    const double d_ds_dt = precomp.dist_matrix[ds_id][dt_id];
+    if (!std::isfinite(d_ds_dt) || d_ds_dt <= 0.0) {
+        // fallback: pas de scoring possible
+        return base;
+    }
+
+    struct ScoredNode {
+        Node n;
+        double score;
+    };
+    vector<ScoredNode> scored;
+    scored.reserve(base.size());
+
+    for (Node w : base) {
+        const int w_id = inst.network.id(w);
+
+        const double d_ds_w = precomp.dist_matrix[ds_id][w_id];
+        const double d_w_dt = precomp.dist_matrix[w_id][dt_id];
+        if (!std::isfinite(d_ds_w) || !std::isfinite(d_w_dt)) continue;
+
+        // 1) Contrôle du détour
+        const double detour = (d_ds_w + d_w_dt) / d_ds_dt;
+        if (detour > 1.45) continue;
+
+        // 2) Eloigner le waypoint de l'arc congestionné (u->v)
+        const double sep = std::min(precomp.dist_matrix[w_id][u_id], precomp.dist_matrix[w_id][v_id]);
+        if (!std::isfinite(sep)) continue;
+
+        // 3) Eviter waypoint trop collé à une extrémité de la demande
+        const double balance = std::abs(d_ds_w - d_w_dt) / (d_ds_w + d_w_dt + 1e-9);
+
+        // 4) Pénalité downstream: target -> w
+        const double downstream_penalty = has_direct_connection(arc_target, w) ? 1.0 : 0.0;
+
+        // score global (à tuner)
+        const double score = 2.0 * sep - 1.3 * detour - 0.4 * balance - 1.0 * downstream_penalty;
+        scored.push_back({w, score});
+    }
+
+    if (scored.empty()) return {};
+
+    std::sort(scored.begin(), scored.end(),
+              [](const ScoredNode& a, const ScoredNode& b) { return a.score > b.score; });
+
+    if (top_k <= 0) top_k = static_cast<int>(scored.size());
+    top_k = std::min(top_k, static_cast<int>(scored.size()));
+
+    vector<Node> out;
+    out.reserve(top_k);
+    for (int i = 0; i < top_k; ++i) out.push_back(scored[i].n);
+
+    return out;
+}
+
+
+
+
+
 
 vector<Node> solution::getNeighbors(const Node& source, const Node& target, const Node& ds,
     const Node& dt, bool twoHops) const {
@@ -211,7 +323,7 @@ bool solution::insertWaypointsIntoExistingPath(
     }
 
     // If no waypoints to insert, path is already valid (source→target)
-    if (to_insert.empty()) return true;
+    if (to_insert.empty()) return false;
 
     // Rebuild path: keep old internal nodes, then append new waypoints before target.
     std::vector<Node> rebuilt_nodes;
@@ -305,12 +417,30 @@ bool solution::removeWayPointFromExistingPath(const Node wp, SrPathBit& io_path,
     return true;
 }
 
+double solution::computeMLU_no_dpa(SegmentRouting & sr, int time_slot,  int& most_congested_arc_id,
+    DemandArc demand_arc,const SrPathBit& old_path, const SrPathBit& path, bool update ) {
+    double flow = inst.dvms[time_slot][demand_arc];
+    // Remove old flow, add new flow
+    sr.routeFlow(old_path, -flow);
+    sr.routeFlow(path, flow);
+
+    auto most = sr.mostLoadedArc(inst.capacities);
+    double mlu = most.second;
+    most_congested_arc_id = (most.first == nt::INVALID) ? -1 : Digraph::id(most.first);
+    // Undo: restore to original state
+    if (update == false) {
+        sr.routeFlow(path, -flow);
+        sr.routeFlow(old_path, flow);
+    }
+    return mlu ;
+}
+
 
 double solution::computeMLU(SegmentRouting & sr, int time_slot,  int& most_congested_arc_id,
     DemandArc demand_arc,const SrPathBit& old_path, const SrPathBit& path, Digraph::ArcMap<DemandArray> & dpa, bool update ) {
     double flow = inst.dvms[time_slot][demand_arc];
-    // Remove old flow, add new flow
 
+    // Remove old flow, add new flow
     sr.routeFlow(old_path, -flow,demand_arc,dpa);
     sr.routeFlow(path, flow,demand_arc,dpa);
 
@@ -327,7 +457,8 @@ double solution::computeMLU(SegmentRouting & sr, int time_slot,  int& most_conge
 
 
 
-Node solution::selectGeometricWaypoint(Node s, Node d, Arc worst_arc, const NetworkPrecompute& precomp) const {
+Node solution::selectGeometricWaypoint(Node s, Node d, Arc worst_arc, const NetworkPrecompute& precomp) const
+{
     const Node u = inst.network.source(worst_arc);
     const Node v = inst.network.target(worst_arc);
 
@@ -441,6 +572,7 @@ void solution::computeAllPairsShortestPaths(NetworkPrecompute& precomp) {
 
 
 int solution::newHeuristicRun() {
+    computeAllPairsShortestPaths(precomp);
     result_builder.setValid(true);
     vector<int> costInterventions(inst.demand_graph.arcNum(),0);
     std::vector<vector<int>> nbSegmentsByDemand(inst.i_num_time_slots, vector<int>(inst.demand_graph.arcNum(), 1));
@@ -460,7 +592,8 @@ int solution::newHeuristicRun() {
             if (t==0) {
                 std::vector<Node> waypoints = {};
                if (!insertWaypointsIntoExistingPath(path,demand_arc, waypoints,scenario.i_max_segments))
-                    cout << "erreur " ;
+                   { //cout << "erreur " ;
+                   }
 
             }
             else {
@@ -491,23 +624,7 @@ int solution::newHeuristicRun() {
             Node v = inst.network.target(worst_arc);
 
             // Collect neighbors of u (excluding v)
-            std::vector<Node> neighbors;
-            for (OutArcIt a(inst.network, u); a != nt::INVALID; ++a) {
-                Node neigh = inst.network.target(a);
-                if (neigh != v) {
-                    neighbors.push_back(neigh);
-                    for (OutArcIt b(inst.network, neigh); b != nt::INVALID; ++b) {
-                        Node neigh2 = inst.network.target(b);
-                        if (neigh2 != neigh && neigh2 != v) {
-                            neighbors.push_back(neigh2);
-                        }
-                    }
-                }
-            }
-            // Pick random neighbor as waypoint
-            int RandomWayPoint = genRandomInt(neighbors.size());
-            Node wp = neighbors[RandomWayPoint];
-            if (neighbors.empty()) continue;
+
             int k = 0 ;
             int tmp_arc = worst_arc_id ;
             bool improved = false;
@@ -518,6 +635,14 @@ int solution::newHeuristicRun() {
             int nb_users = users.size();
 
             while (k < nb_users  && (improved == false || tmp_arc == worst_arc_id)) {
+                std::vector<Node> neighbors;
+                neighbors = getNeighbors(u,v,inst.demand_graph.source(users[k]),
+                    inst.demand_graph.target(users[k]), true);
+                // Pick random neighbor as waypoint
+                int RandomWayPoint = genRandomInt(neighbors.size());
+                Node wp = neighbors[RandomWayPoint];
+                if (neighbors.empty()) continue;
+
                 DemandArc demand_arc = users[k];
                 int i = inst.demand_graph.id(demand_arc);
                 SrPathBit &path = rs.getSrPath(t, demand_arc);

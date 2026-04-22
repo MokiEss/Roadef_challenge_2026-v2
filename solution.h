@@ -31,6 +31,7 @@ class solution {
 
 
 public:
+    NetworkPrecompute precomp;
     Instance   &   inst;
     vector<double> solution_mlu ;
     vector<vector<double>> solution_saturations;
@@ -60,6 +61,9 @@ public:
     double computeMLU(int time_slot, const RoutingScheme& test_rs, int& most_congested_arc_id);
     double computeMLU(SegmentRouting & sr, int time_slot,  int& most_congested_arc_id,
     DemandArc demand_arc,const SrPathBit& old_path, const SrPathBit& path, Digraph::ArcMap<DemandArray> & dpa, bool update);
+
+    double computeMLU_no_dpa(SegmentRouting & sr, int time_slot,  int& most_congested_arc_id,
+    DemandArc demand_arc,const SrPathBit& old_path, const SrPathBit& path, bool update );
     bool insertWaypointsIntoExistingPath(
     SrPathBit& io_path,
     DemandArc demand_arc,
@@ -76,6 +80,15 @@ public:
     Node selectGeometricWaypoint(Node s, Node d, Arc worst_arc, const NetworkPrecompute& precomp) const;
     vector<Node> getNeighbors(const Node& source, const Node & target, const Node& ds,
     const Node& dt, bool TwoHops) const;
+    vector<Node> getPromisingWaypoints(
+    const Node& arc_source,
+    const Node& arc_target,
+    const Node& ds,
+    const Node& dt,
+    const Arc& worst_arc,
+    bool twoHops,
+    int top_k
+) const;
 
 
 
