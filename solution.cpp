@@ -179,10 +179,10 @@ bool solution::printNodesUsedByDemandPath(const Instance& inst,
     ordered.reserve(inst.network.nodeNum());
 
     auto add_once = [&](Node n) {
-        if (!visited.contains(n)) {
+      //  if (!visited.contains(n)) {
             visited.insert(n);
             ordered.push_back(n);
-        }
+      //  }
         return true;
     };
 

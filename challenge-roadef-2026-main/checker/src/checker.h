@@ -440,6 +440,65 @@ inline bool loadAndCheckSrPaths(const std::string& srpaths_file, const Scenario&
  * @return true if the simulation completed successfully, false if any error occurred during routing (e.g., invalid SR paths, unsatisfied demands)
  *
  */
+
+inline bool printNodesUsedByDemandPath(const Instance& inst,
+                                SegmentRouting& sr,
+                                DemandArc demand_arc,
+                                const SrPathBit& path) {
+  if (path.segmentNum() == 0) {
+    std::cout << "Demand " << inst.demand_graph.id(demand_arc) << " has empty SR path\n";
+    return false;
+  }
+
+  const Node source = inst.demand_graph.source(demand_arc);
+  const Node target = inst.demand_graph.target(demand_arc);
+
+  nt::graphs::NodeSet<Digraph> visited(inst.network);
+  std::vector<Node> ordered;
+  ordered.reserve(inst.network.nodeNum());
+
+  auto add_once = [&](Node n) {
+      if (!visited.contains(n)) {
+    visited.insert(n);
+    ordered.push_back(n);
+      }
+    return true;
+  };
+
+  bool ok = path.forEachSegment(
+      inst.network,
+      [&](Node s, Node t) {
+          add_once(s);
+          if (s == t) {
+              add_once(t);
+              return true;
+          }
+          const bool seg_ok = sr.underlyingProtocol().forEachNode(
+              s, t, [&](Node n) { return add_once(n); });
+          add_once(t);
+          return seg_ok;
+      },
+      [&](Arc a) {
+          add_once(inst.network.source(a));
+          add_once(inst.network.target(a));
+      });
+
+  // Print all internal/other nodes first, then force source and target at the end.
+  std::cout << "Demand " << inst.demand_graph.id(demand_arc) << " uses nodes: ";
+  std::cout << inst.network.id(source) << " ";
+  for (Node n : ordered) {
+    if (n != source && n != target) {
+      std::cout << inst.network.id(n) << " ";
+    }
+  }
+
+  if (target != source) std::cout << inst.network.id(target) << " ";
+  std::cout << "\n";
+
+  return ok;
+}
+
+
 inline bool simulateSegmentRouting(Instance& inst, const Scenario& scenario, const RoutingScheme& rs, ResultBuilder& result_builder) noexcept {
   nt::DoubleDynamicArray sat(inst.network.arcNum());
 

@@ -427,10 +427,11 @@ void solver::optimize() {
                 s.solution_saturations[t] = moves[best_neighbor_index].saturations ;
                 apply_move_to_solution(s, moves[best_neighbor_index],  t);
                 total_cost+=moves[best_neighbor_index].cost_move ;
-              /*  cout << "MLU improved " << s.solution_saturations[t][where] << " on the "<<
+               cout << "MLU improved " << s.solution_saturations[t][where] << " on the "<<
                     where+1 <<" most saturated arc and total cost is " << total_cost <<  endl ;
-                cout << "nb of nvalid neighbors " << nb_not_valid<< endl ;*/
+                cout << "nb of nvalid neighbors " << nb_not_valid<< endl ;
                 }
+
         }
     }
 
@@ -439,6 +440,8 @@ void solver::optimize() {
 
     // ===== END OF LOOP =====
     // In solver::optimize() before calling simulateSegmentRouting
+
+
 
     if (!simulateSegmentRouting(s.inst, s.scenario, s.rs, s.result_builder)) {
         s.result_builder.setValid(false);
