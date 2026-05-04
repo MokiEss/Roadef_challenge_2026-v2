@@ -44,7 +44,7 @@ public:
 
     double update_sr_path_for_demand_arcs( solution & sol, const DemandArc & da, int arc_id, int t, neighbor & m);
 
-    void apply_move_to_solution(solution & sol, const neighbor & m, int t);
+    void apply_move_to_solution(solution & sol, const neighbor & m, int t,Digraph::ArcMap<DemandArray> & dpa,int & most_congested_arc_id);
     // optimize
     void optimize();
 

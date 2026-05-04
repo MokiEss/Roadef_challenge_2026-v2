@@ -331,7 +331,7 @@ double solver::update_sr_path_for_demand_arcs(solution& sol, const DemandArc& da
     return 0.0;
 }
 
-void solver::apply_move_to_solution(solution & sol, const neighbor & m, int t) {
+void solver::apply_move_to_solution(solution & sol, const neighbor & m, int t,Digraph::ArcMap<DemandArray> & dpa,int & most_congested_arc_id) {
     SrPathBit& path = sol.rs.getSrPath(t, m.da);
     SrPathBit backup;
     backup.copyFrom(path);
@@ -361,14 +361,14 @@ void solver::apply_move_to_solution(solution & sol, const neighbor & m, int t) {
     }
 
 
-    int most_congested_arc_id ;
-    sol.solution_mlu[t] = sol.computeMLU_no_dpa(sol.sr, t,  most_congested_arc_id,m.da,
-        backup, path, true ) ;
+    sol.solution_mlu[t] = sol.computeMLU(sol.sr, t,  most_congested_arc_id,m.da,
+        backup, path, dpa, true ) ;
 
 }
 
 void solver::optimize() {
     // 1- initial solution
+    chrono::time_point<chrono::system_clock, chrono::system_clock::duration> start = chrono::system_clock::now();
     solution s(inst, use_ftxui, result_builder, scenario, sr );
     total_cost = s.newHeuristicRun();
 
@@ -379,11 +379,12 @@ void solver::optimize() {
         InterventionGuard intervention_guard(s.inst.network, s.inst.metrics, s.scenario.interventions[t]);
         std::cout << "=== Time Slot " << t << std::endl;
         int iterations = 1000 ;
-        while (iterations--) {
+        const auto deadline = chrono::system_clock::now() + std::chrono::minutes(2);
+        Digraph::ArcMap<DemandArray> dpa(s.inst.network);
+        int congested = route_solution(s, t, dpa);
+        while (chrono::system_clock::now() < deadline) {
             vector<neighbor> moves(nbNeighbors) ;
             vector<DemandArc> demand_neighbors(nbNeighbors) ;
-            Digraph::ArcMap<DemandArray> dpa(s.inst.network);
-            int congested = route_solution(s, t,dpa);
             for (int i = 0 ; i < nbNeighbors ; i++) {
                 int arc_id = getOneOfTheMostCongestedArcs(s,congested);
                 if (arc_id == -1) continue;
@@ -425,11 +426,11 @@ void solver::optimize() {
                 // Apply the best move to the solution
                 total_cost -= old_cost_demand;
                 s.solution_saturations[t] = moves[best_neighbor_index].saturations ;
-                apply_move_to_solution(s, moves[best_neighbor_index],  t);
+                apply_move_to_solution(s, moves[best_neighbor_index],  t, dpa, congested);
                 total_cost+=moves[best_neighbor_index].cost_move ;
                cout << "MLU improved " << s.solution_saturations[t][where] << " on the "<<
                     where+1 <<" most saturated arc and total cost is " << total_cost <<  endl ;
-                cout << "nb of nvalid neighbors " << nb_not_valid<< endl ;
+              //  cout << "nb of nvalid neighbors " << nb_not_valid<< endl ;
                 }
 
         }
@@ -475,10 +476,10 @@ void solver::optimize() {
         } else {
             out << nt::JSONDocument::toString(doc, 12) << '\n';
             out.close();
-            std::cout << "JSON written to " << out_path << std::endl;
+           // std::cout << "JSON written to " << out_path << std::endl;
             // visualize the results
-            string command = "python ../visualizer.py " + nInstance + " " + out_path;
-            cout << "Running command: " << command << endl;
+            string command = "python3 ../visualizer.py " + nInstance + " " + out_path;
+           // cout << "Running command: " << command << endl;
             system(command.c_str());
         }
     }

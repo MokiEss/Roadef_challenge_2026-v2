@@ -26,10 +26,5 @@ int main() {
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     std::cout << "Optimization time: " << duration.count() << " seconds" << std::endl;
 
-
-
-
-
-
     return 0;
 }
