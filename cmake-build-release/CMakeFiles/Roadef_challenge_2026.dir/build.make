@@ -156,6 +156,132 @@ CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/solver.cpp -o CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.s
 
+CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/Debug.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/Debug.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/Debug.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/Debug.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/ECMP.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/ECMP.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/ECMP.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/ECMP.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/KShortest.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/KShortest.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/KShortest.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/KShortest.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/Loaders.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/Loaders.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/Loaders.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/Loaders.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/MLU.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/MLU.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/MLU.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/MLU.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/NetworkContext.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/NetworkContext.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/NetworkContext.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/NetworkContext.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/Solution.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/Solution.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/Solution.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/Solution.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/WaypointEnum.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/WaypointEnum.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/WaypointEnum.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/WaypointEnum.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.s
+
+CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/flags.make
+CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o: /home/uha/Desktop/Roadef_challenge_2026/src/main.cpp
+CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o: CMakeFiles/Roadef_challenge_2026.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o -MF CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o.d -o CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o -c /home/uha/Desktop/Roadef_challenge_2026/src/main.cpp
+
+CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/uha/Desktop/Roadef_challenge_2026/src/main.cpp > CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.i
+
+CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/uha/Desktop/Roadef_challenge_2026/src/main.cpp -o CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.s
+
 # Object files for target Roadef_challenge_2026
 Roadef_challenge_2026_OBJECTS = \
 "CMakeFiles/Roadef_challenge_2026.dir/main.cpp.o" \
@@ -163,7 +289,16 @@ Roadef_challenge_2026_OBJECTS = \
 "CMakeFiles/Roadef_challenge_2026.dir/readerInstance.cpp.o" \
 "CMakeFiles/Roadef_challenge_2026.dir/solution.cpp.o" \
 "CMakeFiles/Roadef_challenge_2026.dir/utilities.cpp.o" \
-"CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.o"
+"CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o" \
+"CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o"
 
 # External object files for target Roadef_challenge_2026
 Roadef_challenge_2026_EXTERNAL_OBJECTS =
@@ -174,9 +309,18 @@ Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/readerInstance.cpp.o
 Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/solution.cpp.o
 Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/utilities.cpp.o
 Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o
+Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o
 Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/build.make
 Roadef_challenge_2026: CMakeFiles/Roadef_challenge_2026.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable Roadef_challenge_2026"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/uha/Desktop/Roadef_challenge_2026/cmake-build-release/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX executable Roadef_challenge_2026"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Roadef_challenge_2026.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

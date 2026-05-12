@@ -379,7 +379,7 @@ void solver::optimize() {
         InterventionGuard intervention_guard(s.inst.network, s.inst.metrics, s.scenario.interventions[t]);
         std::cout << "=== Time Slot " << t << std::endl;
         int iterations = 1000 ;
-        const auto deadline = chrono::system_clock::now() + std::chrono::minutes(2);
+        const auto deadline = chrono::system_clock::now() + std::chrono::minutes(4);
         Digraph::ArcMap<DemandArray> dpa(s.inst.network);
         int congested = route_solution(s, t, dpa);
         while (chrono::system_clock::now() < deadline) {

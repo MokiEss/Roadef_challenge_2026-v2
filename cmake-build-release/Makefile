@@ -256,6 +256,222 @@ solver.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/solver.cpp.s
 .PHONY : solver.cpp.s
 
+src/Debug.o: src/Debug.cpp.o
+.PHONY : src/Debug.o
+
+# target to build an object file
+src/Debug.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.o
+.PHONY : src/Debug.cpp.o
+
+src/Debug.i: src/Debug.cpp.i
+.PHONY : src/Debug.i
+
+# target to preprocess a source file
+src/Debug.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.i
+.PHONY : src/Debug.cpp.i
+
+src/Debug.s: src/Debug.cpp.s
+.PHONY : src/Debug.s
+
+# target to generate assembly for a file
+src/Debug.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Debug.cpp.s
+.PHONY : src/Debug.cpp.s
+
+src/ECMP.o: src/ECMP.cpp.o
+.PHONY : src/ECMP.o
+
+# target to build an object file
+src/ECMP.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.o
+.PHONY : src/ECMP.cpp.o
+
+src/ECMP.i: src/ECMP.cpp.i
+.PHONY : src/ECMP.i
+
+# target to preprocess a source file
+src/ECMP.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.i
+.PHONY : src/ECMP.cpp.i
+
+src/ECMP.s: src/ECMP.cpp.s
+.PHONY : src/ECMP.s
+
+# target to generate assembly for a file
+src/ECMP.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/ECMP.cpp.s
+.PHONY : src/ECMP.cpp.s
+
+src/KShortest.o: src/KShortest.cpp.o
+.PHONY : src/KShortest.o
+
+# target to build an object file
+src/KShortest.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.o
+.PHONY : src/KShortest.cpp.o
+
+src/KShortest.i: src/KShortest.cpp.i
+.PHONY : src/KShortest.i
+
+# target to preprocess a source file
+src/KShortest.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.i
+.PHONY : src/KShortest.cpp.i
+
+src/KShortest.s: src/KShortest.cpp.s
+.PHONY : src/KShortest.s
+
+# target to generate assembly for a file
+src/KShortest.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/KShortest.cpp.s
+.PHONY : src/KShortest.cpp.s
+
+src/Loaders.o: src/Loaders.cpp.o
+.PHONY : src/Loaders.o
+
+# target to build an object file
+src/Loaders.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.o
+.PHONY : src/Loaders.cpp.o
+
+src/Loaders.i: src/Loaders.cpp.i
+.PHONY : src/Loaders.i
+
+# target to preprocess a source file
+src/Loaders.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.i
+.PHONY : src/Loaders.cpp.i
+
+src/Loaders.s: src/Loaders.cpp.s
+.PHONY : src/Loaders.s
+
+# target to generate assembly for a file
+src/Loaders.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Loaders.cpp.s
+.PHONY : src/Loaders.cpp.s
+
+src/MLU.o: src/MLU.cpp.o
+.PHONY : src/MLU.o
+
+# target to build an object file
+src/MLU.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.o
+.PHONY : src/MLU.cpp.o
+
+src/MLU.i: src/MLU.cpp.i
+.PHONY : src/MLU.i
+
+# target to preprocess a source file
+src/MLU.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.i
+.PHONY : src/MLU.cpp.i
+
+src/MLU.s: src/MLU.cpp.s
+.PHONY : src/MLU.s
+
+# target to generate assembly for a file
+src/MLU.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/MLU.cpp.s
+.PHONY : src/MLU.cpp.s
+
+src/NetworkContext.o: src/NetworkContext.cpp.o
+.PHONY : src/NetworkContext.o
+
+# target to build an object file
+src/NetworkContext.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.o
+.PHONY : src/NetworkContext.cpp.o
+
+src/NetworkContext.i: src/NetworkContext.cpp.i
+.PHONY : src/NetworkContext.i
+
+# target to preprocess a source file
+src/NetworkContext.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.i
+.PHONY : src/NetworkContext.cpp.i
+
+src/NetworkContext.s: src/NetworkContext.cpp.s
+.PHONY : src/NetworkContext.s
+
+# target to generate assembly for a file
+src/NetworkContext.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/NetworkContext.cpp.s
+.PHONY : src/NetworkContext.cpp.s
+
+src/Solution.o: src/Solution.cpp.o
+.PHONY : src/Solution.o
+
+# target to build an object file
+src/Solution.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.o
+.PHONY : src/Solution.cpp.o
+
+src/Solution.i: src/Solution.cpp.i
+.PHONY : src/Solution.i
+
+# target to preprocess a source file
+src/Solution.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.i
+.PHONY : src/Solution.cpp.i
+
+src/Solution.s: src/Solution.cpp.s
+.PHONY : src/Solution.s
+
+# target to generate assembly for a file
+src/Solution.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/Solution.cpp.s
+.PHONY : src/Solution.cpp.s
+
+src/WaypointEnum.o: src/WaypointEnum.cpp.o
+.PHONY : src/WaypointEnum.o
+
+# target to build an object file
+src/WaypointEnum.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.o
+.PHONY : src/WaypointEnum.cpp.o
+
+src/WaypointEnum.i: src/WaypointEnum.cpp.i
+.PHONY : src/WaypointEnum.i
+
+# target to preprocess a source file
+src/WaypointEnum.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.i
+.PHONY : src/WaypointEnum.cpp.i
+
+src/WaypointEnum.s: src/WaypointEnum.cpp.s
+.PHONY : src/WaypointEnum.s
+
+# target to generate assembly for a file
+src/WaypointEnum.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/WaypointEnum.cpp.s
+.PHONY : src/WaypointEnum.cpp.s
+
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
+
+# target to build an object file
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
+
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Roadef_challenge_2026.dir/build.make CMakeFiles/Roadef_challenge_2026.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
+
 utilities.o: utilities.cpp.o
 .PHONY : utilities.o
 
@@ -305,6 +521,33 @@ help:
 	@echo "... solver.o"
 	@echo "... solver.i"
 	@echo "... solver.s"
+	@echo "... src/Debug.o"
+	@echo "... src/Debug.i"
+	@echo "... src/Debug.s"
+	@echo "... src/ECMP.o"
+	@echo "... src/ECMP.i"
+	@echo "... src/ECMP.s"
+	@echo "... src/KShortest.o"
+	@echo "... src/KShortest.i"
+	@echo "... src/KShortest.s"
+	@echo "... src/Loaders.o"
+	@echo "... src/Loaders.i"
+	@echo "... src/Loaders.s"
+	@echo "... src/MLU.o"
+	@echo "... src/MLU.i"
+	@echo "... src/MLU.s"
+	@echo "... src/NetworkContext.o"
+	@echo "... src/NetworkContext.i"
+	@echo "... src/NetworkContext.s"
+	@echo "... src/Solution.o"
+	@echo "... src/Solution.i"
+	@echo "... src/Solution.s"
+	@echo "... src/WaypointEnum.o"
+	@echo "... src/WaypointEnum.i"
+	@echo "... src/WaypointEnum.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 	@echo "... utilities.o"
 	@echo "... utilities.i"
 	@echo "... utilities.s"

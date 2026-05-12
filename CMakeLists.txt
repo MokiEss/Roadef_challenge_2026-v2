@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_compile_options(-Wno-c++11-narrowing -Wno-switch)
 
-add_executable(Roadef_challenge_2026 main.cpp
+file(GLOB SRC_FILES src/*.cpp src/*.h)
+
+add_executable(Roadef_challenge_2026
+        main.cpp
         DataAnalysis.h
         DataAnalysis.cpp
         readerInstance.h
@@ -16,7 +19,9 @@ add_executable(Roadef_challenge_2026 main.cpp
         utilities.h
         utilities.cpp
         solver.h
-        solver.cpp)
+        solver.cpp
+        ${SRC_FILES}
+)
 
 target_include_directories(Roadef_challenge_2026 PRIVATE
         ${CMAKE_SOURCE_DIR}/networktools-main/networktools
